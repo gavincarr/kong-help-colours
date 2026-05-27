@@ -15,6 +15,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -76,7 +77,9 @@ var Help kong.HelpPrinter = func(options kong.HelpOptions, ctx *kong.Context) er
 }
 
 // ShortHelp is the equivalent wrapper around kong.DefaultShortHelpPrinter,
-// for use with kong.ShortHelp(...).
+// for use with kong.ShortHelp(...). Kong invokes the short-help printer
+// when a parse error occurs, to print a one-line usage summary plus
+// a "Run 'foo --help' for more information." pointer.
 var ShortHelp kong.HelpPrinter = func(options kong.HelpOptions, ctx *kong.Context) error {
 	return printWithColour(options, ctx, kong.DefaultShortHelpPrinter)
 }
@@ -89,6 +92,21 @@ func printWithColour(options kong.HelpOptions, ctx *kong.Context, inner kong.Hel
 	if !shouldColour(target) {
 		return inner(options, ctx)
 	}
+
+	// Kong's guessWidth() type-asserts ctx.Stdout to *os.File for an ioctl
+	// call. Once we swap stdout for a bytes.Buffer below, that path is dead
+	// and guessWidth falls through to a hard-coded 80. To preserve the
+	// caller's terminal width, propagate it via the COLUMNS env var (which
+	// guessWidth honours first), unless the user already set COLUMNS.
+	if os.Getenv("COLUMNS") == "" {
+		if f, ok := target.(*os.File); ok {
+			if w, _, err := term.GetSize(int(f.Fd())); err == nil && w > 0 {
+				os.Setenv("COLUMNS", strconv.Itoa(w))
+				defer os.Unsetenv("COLUMNS")
+			}
+		}
+	}
+
 	var buf bytes.Buffer
 	ctx.Stdout = &buf
 	err := inner(options, ctx)
