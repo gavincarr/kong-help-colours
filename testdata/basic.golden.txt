@@ -1,0 +1,9 @@
+[33mUsage:[0m [32mdemo[0m [[36m<file>[0m] [flags]
+
+[33mArguments:[0m
+  [[36m<file>[0m]    Input file.
+
+[33mFlags:[0m
+  [32m-h[0m, [32m--help[0m       Show context-sensitive help.
+  [32m-v[0m, [32m--verbose[0m    Enable verbose output.
+  [32m-t[0m, [32m--sep[0m=SEP    CSV separator.

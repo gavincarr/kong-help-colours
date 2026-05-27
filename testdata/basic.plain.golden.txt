@@ -1,0 +1,9 @@
+Usage: demo [<file>] [flags]
+
+Arguments:
+  [<file>]    Input file.
+
+Flags:
+  -h, --help       Show context-sensitive help.
+  -v, --verbose    Enable verbose output.
+  -t, --sep=SEP    CSV separator.
