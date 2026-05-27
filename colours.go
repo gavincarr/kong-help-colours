@@ -26,6 +26,7 @@ const (
 // Compiled regex rules used by colourise.
 var (
 	reSectionHeader = regexp.MustCompile(`^[A-Z][A-Za-z0-9 ]*:$`)
+	reUsageLine     = regexp.MustCompile(`^(Usage: )(\S+)`)
 )
 
 // colourise applies the colour rules to a block of help text and returns
@@ -51,5 +52,6 @@ func colouriseLine(line string) string {
 	if reSectionHeader.MatchString(line) {
 		return ansiYellow + line + ansiReset
 	}
+	line = reUsageLine.ReplaceAllString(line, ansiYellow+"Usage:"+ansiReset+" "+ansiGreen+"${2}"+ansiReset)
 	return line
 }
