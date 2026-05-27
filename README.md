@@ -57,3 +57,11 @@ When colour is disabled the package delegates straight through to
 ```bash
 go run ./cmd/demo --help
 ```
+
+## Author
+
+Gavin Carr <gavin@openfusion.net>
+
+## License
+
+MIT — see [LICENSE](LICENSE).
