@@ -105,9 +105,10 @@ The buffered help text is processed once, line by line, applying the
 following rules in order. Each rule wraps its match in
 `\e[<code>m...\e[0m`.
 
-1. **Section header line.** A line whose trimmed content matches
-   `^[A-Z][A-Za-z0-9 ]*:$` → wrap the whole line content in yellow.
-   This covers kong's built-in headers (`Usage:`, `Arguments:`,
+1. **Section header line.** A line matching `^[A-Z][A-Za-z0-9 ]*:$`
+   → wrap the line in yellow. kong's own headers and group titles
+   are emitted at indent 0, so no leading-whitespace tolerance is
+   needed. Covers kong's built-in headers (`Usage:`, `Arguments:`,
    `Flags:`, `Commands:`) and user-defined group titles.
 2. **Usage line program name.** On a line beginning `Usage: `, colour
    the first whitespace-delimited token after `Usage: ` in green.
@@ -184,24 +185,88 @@ cmd/demo/main.go      # small kong app for visual confirmation
   decision for the matrix of (NO_COLOR set/unset) × (FORCE_COLOR
   set/unset) × (stdout is TTY/not). Inject env via `t.Setenv` and use
   a `*os.File` from `os.Pipe()` for the non-TTY case.
-- **End-to-end test**: build a tiny `kong.New(&struct{ ... }{})` CLI
-  inside the test, call `Help` with `ctx.Stdout` pointing at a
-  `bytes.Buffer`, set `FORCE_COLOR=1`, and assert the output contains
-  the expected ANSI sequences for known section headers and flags.
-  Also assert that the same call with `NO_COLOR=1` produces output
-  identical to `kong.DefaultHelpPrinter`.
+- **Golden tests against real kong output** (the upstream-drift
+  safety net — see "Golden test matrix" below). For each fixture CLI,
+  parse `--help` through `kong.New(...).Parse([]string{"--help"})`
+  twice, once with `kong.Help(helpcolours.Help)` and once with
+  `kong.DefaultHelpPrinter`, both with `FORCE_COLOR=1` and stdout
+  redirected to a buffer. Compare each against a checked-in golden
+  file. Stripping ANSI from the colourised golden must yield the
+  default-printer golden byte-for-byte. Regenerate goldens with
+  `go test ./... -update`. These tests run in CI on every kong
+  version bump.
+- **End-to-end smoke test**: build a tiny `kong.New(&struct{ ... }{})`
+  CLI inside the test, route stdout to a `bytes.Buffer`, set
+  `FORCE_COLOR=1`, parse `--help`, and assert the buffered output
+  contains the expected ANSI sequences for known section headers
+  and flags. Also assert that the same call with `NO_COLOR=1`
+  produces output identical to `kong.DefaultHelpPrinter`.
 - **`cmd/demo`**: not automated — exists so the developer can run
   `go run ./cmd/demo --help` and eyeball the result against `csv_cut -h`.
+
+## Golden test matrix
+
+The golden-test fixtures are the structural defence against kong
+upstream drift. The matrix below covers every kong help-layout
+feature that could change how a token appears in the output stream.
+Each fixture is a tiny CLI struct in `testdata/`, with two checked-in
+golden files (`*.golden.txt` for colourised, `*.plain.golden.txt`
+for the default-printer reference).
+
+| Fixture                | Exercises                                                    |
+| ---------------------- | ------------------------------------------------------------ |
+| `basic`                | Single command, flags with and without short, one positional |
+| `groups`               | Custom flag groups with titles and descriptions              |
+| `subcommands`          | App with two sibling subcommands                             |
+| `compact`              | `kong.ConfigureHelp(HelpOptions{Compact: true})`             |
+| `tree`                 | `Tree: true` layout                                          |
+| `flags-last`           | `FlagsLast: true`                                            |
+| `env-vars`             | Flags with `env:"FOO"` tags (parenthesised env hints)        |
+| `negatable`            | Bool flags with `negatable:""` and `negatable:"disable-..."` |
+| `defaults`             | Flags with `default:""` annotations (must **not** be coloured as placeholders) |
+| `long-help`            | Multi-paragraph `help:""` strings that exercise wrapping     |
+
+Any kong upgrade that changes the layout for any of these will fail
+its golden diff loudly with a readable diff, telling us exactly what
+moved.
 
 ## Open risks
 
 - **kong upstream changes to header text.** If kong renames `Flags:`
   to e.g. `Options:`, the section-header regex still matches (it's
   generic), so no breakage. If kong starts emitting headers with
-  leading indentation, the regex would need adjustment — covered by
-  tests against kong's actual output.
+  leading indentation, the regex would need adjustment — golden
+  tests catch this immediately.
+- **kong changes placeholder syntax** (e.g. switches `<FOO>` to
+  `{FOO}`). Low-likelihood but high-impact; golden tests detect it
+  on the next kong bump and the fix is a one-line regex update.
 - **User group titles that don't end in `:`.** They wouldn't be
   coloured as headers. Acceptable; kong's own built-in titles all end
   in `:` and most user titles follow suit.
 - **Help text containing literal text shaped like flags or
   placeholders.** Will be coloured. This is what clap does too.
+
+## Why not lower-layer
+
+Considered (and rejected): walk `*kong.Context` / `*Application` /
+`*Node` directly and emit help ourselves with colours interleaved.
+
+Pros of doing it that way: each coloured span comes from a known
+model token, so user-written help text containing `--foo`-shaped
+characters can never be mis-coloured.
+
+Cons: reimplements terminal-width detection, two-column alignment
+via `go/doc`'s wrapper, group bucketing, compact mode, tree mode,
+`FlagsLast`, indentation, env-var formatting — ~400 LOC of
+restated layout code that breaks loudly on any kong refactor.
+
+The post-processing approach is coupled only to generic help
+conventions (lines like `Xxx:` are section headers, `--foo` is a
+flag, `<FOO>` is a placeholder), and its failure mode is graceful
+(an un-coloured token, not broken output). The golden test matrix
+above is the explicit safety net for the small remaining risk.
+
+If we ever want to colour structural properties that aren't visible
+in the formatted text (e.g. dim default annotations, special-case
+env hints, distinguish required-vs-optional flags), reaching for
+the model would start to pay off — at that point, revisit.
