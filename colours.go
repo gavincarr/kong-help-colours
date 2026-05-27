@@ -11,11 +11,13 @@
 package helpcolours
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"regexp"
 	"strings"
 
+	"github.com/alecthomas/kong"
 	"golang.org/x/term"
 )
 
@@ -64,6 +66,38 @@ func colouriseLine(line string) string {
 		return ansiCyan + m + ansiReset
 	})
 	return line
+}
+
+// Help is a kong.HelpPrinter that delegates to kong.DefaultHelpPrinter
+// and post-processes the output to inject ANSI colour codes when colour
+// is enabled for ctx.Stdout.
+var Help kong.HelpPrinter = func(options kong.HelpOptions, ctx *kong.Context) error {
+	return printWithColour(options, ctx, kong.DefaultHelpPrinter)
+}
+
+// ShortHelp is the equivalent wrapper around kong.DefaultShortHelpPrinter,
+// for use with kong.ShortHelp(...).
+var ShortHelp kong.HelpPrinter = func(options kong.HelpOptions, ctx *kong.Context) error {
+	return printWithColour(options, ctx, kong.DefaultShortHelpPrinter)
+}
+
+// printWithColour routes the inner printer's output through colourise when
+// shouldColour returns true; otherwise it calls inner directly with no
+// buffering.
+func printWithColour(options kong.HelpOptions, ctx *kong.Context, inner kong.HelpPrinter) error {
+	target := ctx.Stdout
+	if !shouldColour(target) {
+		return inner(options, ctx)
+	}
+	var buf bytes.Buffer
+	ctx.Stdout = &buf
+	err := inner(options, ctx)
+	ctx.Stdout = target
+	if err != nil {
+		return err
+	}
+	_, err = io.WriteString(target, colourise(buf.String()))
+	return err
 }
 
 // shouldColour decides whether to colourise output written to w.
