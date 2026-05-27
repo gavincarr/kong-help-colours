@@ -36,7 +36,7 @@ func TestColourise_UsageLine(t *testing.T) {
 		{
 			name: "simple usage",
 			in:   "Usage: csv_cut [OPTIONS]",
-			want: "\x1b[33mUsage:\x1b[0m \x1b[32mcsv_cut\x1b[0m [OPTIONS]",
+			want: "\x1b[33mUsage:\x1b[0m \x1b[32mcsv_cut\x1b[0m \x1b[36m[OPTIONS]\x1b[0m",
 		},
 		{
 			name: "subcommand usage path-colouring stops at program token, but rule 3 colors flags",
@@ -83,12 +83,54 @@ func TestColourise_FlagTokens(t *testing.T) {
 		{
 			name: "no false-match inside placeholder (no leading boundary)",
 			in:   "  <--FOO>  oddly-named placeholder",
-			want: "  <--FOO>  oddly-named placeholder",
+			want: "  \x1b[36m<--FOO>\x1b[0m  oddly-named placeholder",
 		},
 		{
 			name: "section header line untouched by flag rule",
 			in:   "Flags:",
 			want: "\x1b[33mFlags:\x1b[0m",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := colourise(tc.in)
+			if got != tc.want {
+				t.Errorf("colourise(%q) =\n  got:  %q\n  want: %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestColourise_Placeholders(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "angle-bracket placeholder",
+			in:   "  --sep <SEP>      CSV separator",
+			want: "  \x1b[32m--sep\x1b[0m \x1b[36m<SEP>\x1b[0m      CSV separator",
+		},
+		{
+			name: "bracketed uppercase placeholder",
+			in:   "Usage: foo [OPTIONS]",
+			want: "\x1b[33mUsage:\x1b[0m \x1b[32mfoo\x1b[0m \x1b[36m[OPTIONS]\x1b[0m",
+		},
+		{
+			name: "lowercase bracketed text is not a placeholder",
+			in:   "  --sep <SEP>      CSV separator [default: ,]",
+			want: "  \x1b[32m--sep\x1b[0m \x1b[36m<SEP>\x1b[0m      CSV separator [default: ,]",
+		},
+		{
+			name: "mixed-case bracketed (first char must be uppercase)",
+			in:   "see [Examples] section",
+			want: "see \x1b[36m[Examples]\x1b[0m section",
+		},
+		{
+			name: "section header untouched",
+			in:   "Arguments:",
+			want: "\x1b[33mArguments:\x1b[0m",
 		},
 	}
 	for _, tc := range cases {
