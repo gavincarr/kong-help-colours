@@ -1,0 +1,8 @@
+[33mUsage:[0m [32mdemo[0m [flags]
+
+[33mFlags:[0m
+  [32m-h[0m, [32m--help[0m            Show context-sensitive help.
+      [32m--format[0m="csv"    Output format. Use 'csv' for comma-separated values,
+                        'tsv' for tab-separated values, or 'json' for JSON
+                        Lines. CSV is the default and is suitable for most
+                        spreadsheet tools.

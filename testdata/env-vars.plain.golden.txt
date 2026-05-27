@@ -1,0 +1,6 @@
+Usage: demo [flags]
+
+Flags:
+  -h, --help                   Show context-sensitive help.
+      --db-host="localhost"    Database host ($DB_HOST).
+      --db-port=5432           Database port ($DB_PORT).

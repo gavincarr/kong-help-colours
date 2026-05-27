@@ -1,0 +1,7 @@
+[33mUsage:[0m [32mdemo[0m [flags]
+
+[33mFlags:[0m
+  [32m-h[0m, [32m--help[0m          Show context-sensitive help.
+      [32m--sep[0m=","       Field separator.
+      [32m--retries[0m=3     Number of retries.
+      [32m--output[0m="-"    Output path or '-' for stdout.

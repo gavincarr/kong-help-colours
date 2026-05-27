@@ -1,0 +1,14 @@
+[33mUsage:[0m [32mdemo[0m [36m<command>[0m [flags]
+
+[33mFlags:[0m
+  [32m-h[0m, [32m--help[0m       Show context-sensitive help.
+  [32m-v[0m, [32m--verbose[0m    Enable verbose output.
+
+[33mCommands:[0m
+  serve [flags]
+    Run the HTTP server.
+
+  migrate [36m<dir>[0m [flags]
+    Run database migrations.
+
+Run "demo [36m<command>[0m [32m--help[0m" for more information on a command.

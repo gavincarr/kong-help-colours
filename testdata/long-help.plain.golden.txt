@@ -1,0 +1,8 @@
+Usage: demo [flags]
+
+Flags:
+  -h, --help            Show context-sensitive help.
+      --format="csv"    Output format. Use 'csv' for comma-separated values,
+                        'tsv' for tab-separated values, or 'json' for JSON
+                        Lines. CSV is the default and is suitable for most
+                        spreadsheet tools.

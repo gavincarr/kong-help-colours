@@ -1,0 +1,6 @@
+Usage: demo [flags]
+
+Flags:
+  -h, --help              Show context-sensitive help.
+      --[no-]verbose      Toggle verbose output.
+      --cache/no-cache    Toggle response caching.

@@ -1,0 +1,13 @@
+Usage: demo <command> [flags]
+
+Flags:
+  -h, --help       Show context-sensitive help.
+  -v, --verbose    Enable verbose output.
+
+Commands:
+  serve      Run the HTTP server.
+
+  migrate    Run database migrations.
+    <dir>    Migrations directory.
+
+Run "demo <command> --help" for more information on a command.

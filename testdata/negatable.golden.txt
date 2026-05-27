@@ -1,0 +1,6 @@
+[33mUsage:[0m [32mdemo[0m [flags]
+
+[33mFlags:[0m
+  [32m-h[0m, [32m--help[0m              Show context-sensitive help.
+      --[no-]verbose      Toggle verbose output.
+      [32m--cache[0m/no-cache    Toggle response caching.

@@ -1,0 +1,7 @@
+Usage: demo [flags]
+
+Flags:
+  -h, --help          Show context-sensitive help.
+      --sep=","       Field separator.
+      --retries=3     Number of retries.
+      --output="-"    Output path or '-' for stdout.
