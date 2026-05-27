@@ -88,7 +88,10 @@ var ShortHelp kong.HelpPrinter = func(options kong.HelpOptions, ctx *kong.Contex
 
 // printWithColour routes the inner printer's output through colourise when
 // shouldColour returns true; otherwise it calls inner directly with no
-// buffering.
+// buffering. Not safe for concurrent calls when ctx.Stdout is a terminal —
+// the COLUMNS env var is briefly mutated to propagate terminal width into
+// kong's layout. CLI help printers are typically invoked from a single
+// goroutine at startup, so this is fine in practice.
 func printWithColour(options kong.HelpOptions, ctx *kong.Context, inner kong.HelpPrinter) error {
 	target := ctx.Stdout
 	if !shouldColour(target) {

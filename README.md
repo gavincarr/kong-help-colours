@@ -42,6 +42,11 @@ func main() {
 The scheme is fixed — no options, no configuration. It mirrors clap's
 defaults so it'll look like every Rust CLI you've used.
 
+Known limitation: kong's negatable-flag forms (`--[no-]verbose` and
+`--cache/no-cache`) are not fully coloured — the `[no-]` and
+`/no-cache` parts fall outside the simple flag-token pattern used by
+the post-processing rules.
+
 ## When colours are emitted
 
 Colour is enabled when **all** of:
