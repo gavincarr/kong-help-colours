@@ -34,7 +34,7 @@ const (
 var (
 	reSectionHeader     = regexp.MustCompile(`^[A-Z][A-Za-z0-9 ]*:$`)
 	reUsageLine         = regexp.MustCompile(`^(Usage: )(\S+)`)
-	reFlagToken         = regexp.MustCompile(`(^|[\s,=])(--?[A-Za-z][A-Za-z0-9-]*)`)
+	reFlagToken         = regexp.MustCompile(`(^|[\s,=/])(--\[no-\][A-Za-z][A-Za-z0-9-]*|--?[A-Za-z][A-Za-z0-9-]*(/[A-Za-z][A-Za-z0-9-]*)?)`)
 	rePlaceholder       = regexp.MustCompile(`<[^>]+>|\[[A-Z][^\]]*\]`)
 	reEqualsPlaceholder = regexp.MustCompile(`=([A-Z][A-Z0-9_-]*)`)
 )

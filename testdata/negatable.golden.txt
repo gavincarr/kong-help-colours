@@ -2,5 +2,5 @@
 
 [33mFlags:[0m
   [32m-h[0m, [32m--help[0m              Show context-sensitive help.
-      --[no-]verbose      Toggle verbose output.
-      [32m--cache[0m/no-cache    Toggle response caching.
+      [32m--[no-]verbose[0m      Toggle verbose output.
+      [32m--cache/no-cache[0m    Toggle response caching.

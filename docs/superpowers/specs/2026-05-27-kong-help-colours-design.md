@@ -113,9 +113,14 @@ following rules in order. Each rule wraps its match in
 2. **Usage line program name.** On a line beginning `Usage: `, colour
    the first whitespace-delimited token after `Usage: ` in green.
    (The `Usage:` label itself is coloured by rule 1.)
-3. **Flag tokens.** Match `(?:^|[\s,=])(--?[A-Za-z][A-Za-z0-9-]*)` and
-   wrap the captured flag in green. Anchoring on a leading boundary
-   prevents matches inside placeholders or default values.
+3. **Flag tokens.** Match
+   `(?:^|[\s,=/])(--\[no-\][A-Za-z][A-Za-z0-9-]*|--?[A-Za-z][A-Za-z0-9-]*(/[A-Za-z][A-Za-z0-9-]*)?)`
+   and wrap the captured flag in green. Two alternations cover kong's
+   negatable-flag forms: `--[no-]verbose` (from `negatable:""`) and
+   `--cache/no-cache` (from `negatable:"no-cache"`). The leading-boundary
+   anchor prevents matches inside placeholders or default values; adding
+   `/` to the boundary class lets slash-separated flag mentions in user
+   help text get both halves coloured.
 4. **Placeholders.** Match `<[^>]+>` and `\[[A-Z][^\]]*\]` and wrap in
    cyan. The uppercase-leading character constraint on `[...]` avoids
    colouring kong's `[default: ...]` annotations.

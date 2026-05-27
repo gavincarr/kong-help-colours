@@ -221,6 +221,48 @@ func TestColourise_EqualsPlaceholder(t *testing.T) {
 	}
 }
 
+func TestColourise_NegatableFlags(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "bracket-prefix negatable",
+			in:   "  --[no-]verbose      Toggle verbose output.",
+			want: "  \x1b[32m--[no-]verbose\x1b[0m      Toggle verbose output.",
+		},
+		{
+			name: "slash-alternate negatable",
+			in:   "  --cache/no-cache    Toggle response caching.",
+			want: "  \x1b[32m--cache/no-cache\x1b[0m    Toggle response caching.",
+		},
+		{
+			name: "user help text with slash-separated flags",
+			in:   "Use --foo/--bar to choose mode.",
+			want: "Use \x1b[32m--foo\x1b[0m/\x1b[32m--bar\x1b[0m to choose mode.",
+		},
+		{
+			name: "plain flag with no slash still works",
+			in:   "  --verbose    Plain flag.",
+			want: "  \x1b[32m--verbose\x1b[0m    Plain flag.",
+		},
+		{
+			name: "bracket-prefix not coloured as placeholder by rule 4 (lowercase no-)",
+			in:   "  --[no-]debug",
+			want: "  \x1b[32m--[no-]debug\x1b[0m",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := colourise(tc.in)
+			if got != tc.want {
+				t.Errorf("colourise(%q) =\n  got:  %q\n  want: %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestShouldColour_NoColorAlwaysWins(t *testing.T) {
 	t.Setenv("NO_COLOR", "1")
 	t.Setenv("FORCE_COLOR", "1")
