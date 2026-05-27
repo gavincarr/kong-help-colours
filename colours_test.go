@@ -1,6 +1,9 @@
 package helpcolours
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestColourise_SectionHeader(t *testing.T) {
 	cases := []struct {
@@ -140,5 +143,36 @@ func TestColourise_Placeholders(t *testing.T) {
 				t.Errorf("colourise(%q) =\n  got:  %q\n  want: %q", tc.in, got, tc.want)
 			}
 		})
+	}
+}
+
+func TestColourise_FullHelp(t *testing.T) {
+	in := strings.Join([]string{
+		"Usage: csv_cut [OPTIONS] --fields <FIELDS> [CSVFile]",
+		"",
+		"Arguments:",
+		"  [CSVFile]  CSV file to be processed",
+		"",
+		"Flags:",
+		"  -h, --help             Show context-sensitive help.",
+		"  -t, --sep <SEP>        CSV separator [default: ,]",
+		"  -f, --fields <FIELDS>  Comma-separated list of field names",
+	}, "\n") + "\n"
+
+	want := strings.Join([]string{
+		"\x1b[33mUsage:\x1b[0m \x1b[32mcsv_cut\x1b[0m \x1b[36m[OPTIONS]\x1b[0m \x1b[32m--fields\x1b[0m \x1b[36m<FIELDS>\x1b[0m \x1b[36m[CSVFile]\x1b[0m",
+		"",
+		"\x1b[33mArguments:\x1b[0m",
+		"  \x1b[36m[CSVFile]\x1b[0m  CSV file to be processed",
+		"",
+		"\x1b[33mFlags:\x1b[0m",
+		"  \x1b[32m-h\x1b[0m, \x1b[32m--help\x1b[0m             Show context-sensitive help.",
+		"  \x1b[32m-t\x1b[0m, \x1b[32m--sep\x1b[0m \x1b[36m<SEP>\x1b[0m        CSV separator [default: ,]",
+		"  \x1b[32m-f\x1b[0m, \x1b[32m--fields\x1b[0m \x1b[36m<FIELDS>\x1b[0m  Comma-separated list of field names",
+	}, "\n") + "\n"
+
+	got := colourise(in)
+	if got != want {
+		t.Errorf("colourise(...) =\n  got:  %q\n  want: %q", got, want)
 	}
 }
