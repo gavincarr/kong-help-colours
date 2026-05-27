@@ -179,6 +179,48 @@ func TestColourise_FullHelp(t *testing.T) {
 	}
 }
 
+func TestColourise_EqualsPlaceholder(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "bare uppercase placeholder after equals",
+			in:   "  --sep=STRING    Field separator.",
+			want: "  \x1b[32m--sep\x1b[0m=\x1b[36mSTRING\x1b[0m    Field separator.",
+		},
+		{
+			name: "slice placeholder with trailing comma-ellipsis",
+			in:   "  --fields=FIELDS,...  List of fields.",
+			want: "  \x1b[32m--fields\x1b[0m=\x1b[36mFIELDS\x1b[0m,...  List of fields.",
+		},
+		{
+			name: "lowercase after equals is not coloured",
+			in:   "  --mode=fast    Speed mode.",
+			want: "  \x1b[32m--mode\x1b[0m=fast    Speed mode.",
+		},
+		{
+			name: "digits after equals not coloured",
+			in:   "  --port=8080    Listen port.",
+			want: "  \x1b[32m--port\x1b[0m=8080    Listen port.",
+		},
+		{
+			name: "angle-bracket form still works (rule 4 original)",
+			in:   "  --sep=<SEP>    Field separator.",
+			want: "  \x1b[32m--sep\x1b[0m=\x1b[36m<SEP>\x1b[0m    Field separator.",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := colourise(tc.in)
+			if got != tc.want {
+				t.Errorf("colourise(%q) =\n  got:  %q\n  want: %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestShouldColour_NoColorAlwaysWins(t *testing.T) {
 	t.Setenv("NO_COLOR", "1")
 	t.Setenv("FORCE_COLOR", "1")

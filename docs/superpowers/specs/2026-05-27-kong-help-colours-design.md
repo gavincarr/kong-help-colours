@@ -119,6 +119,12 @@ following rules in order. Each rule wraps its match in
 4. **Placeholders.** Match `<[^>]+>` and `\[[A-Z][^\]]*\]` and wrap in
    cyan. The uppercase-leading character constraint on `[...]` avoids
    colouring kong's `[default: ...]` annotations.
+5. **Equals placeholders.** Match `=([A-Z][A-Z0-9_-]*)` and wrap the
+   captured uppercase token in cyan. This handles kong's `--flag=VALUE`
+   form (e.g., `--sep=STRING`, `--fields=FIELDS,...`), which is kong's
+   default rendering when no `placeholder` tag is set. Falls back to
+   leaving `=lowercase`, `=42`, and similar non-placeholder values
+   uncoloured.
 
 Rules 3 and 4 are applied to all non-header lines (header lines are
 already wrapped in yellow by rule 1 and skipped from further

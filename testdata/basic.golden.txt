@@ -6,4 +6,4 @@
 [33mFlags:[0m
   [32m-h[0m, [32m--help[0m       Show context-sensitive help.
   [32m-v[0m, [32m--verbose[0m    Enable verbose output.
-  [32m-t[0m, [32m--sep[0m=SEP    CSV separator.
+  [32m-t[0m, [32m--sep[0m=[36mSEP[0m    CSV separator.

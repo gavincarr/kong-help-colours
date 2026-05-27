@@ -32,10 +32,11 @@ const (
 
 // Compiled regex rules used by colourise.
 var (
-	reSectionHeader = regexp.MustCompile(`^[A-Z][A-Za-z0-9 ]*:$`)
-	reUsageLine     = regexp.MustCompile(`^(Usage: )(\S+)`)
-	reFlagToken     = regexp.MustCompile(`(^|[\s,=])(--?[A-Za-z][A-Za-z0-9-]*)`)
-	rePlaceholder   = regexp.MustCompile(`<[^>]+>|\[[A-Z][^\]]*\]`)
+	reSectionHeader     = regexp.MustCompile(`^[A-Z][A-Za-z0-9 ]*:$`)
+	reUsageLine         = regexp.MustCompile(`^(Usage: )(\S+)`)
+	reFlagToken         = regexp.MustCompile(`(^|[\s,=])(--?[A-Za-z][A-Za-z0-9-]*)`)
+	rePlaceholder       = regexp.MustCompile(`<[^>]+>|\[[A-Z][^\]]*\]`)
+	reEqualsPlaceholder = regexp.MustCompile(`=([A-Z][A-Z0-9_-]*)`)
 )
 
 // colourise applies the colour rules to a block of help text and returns
@@ -66,6 +67,7 @@ func colouriseLine(line string) string {
 	line = rePlaceholder.ReplaceAllStringFunc(line, func(m string) string {
 		return ansiCyan + m + ansiReset
 	})
+	line = reEqualsPlaceholder.ReplaceAllString(line, "="+ansiCyan+"${1}"+ansiReset)
 	return line
 }
 
