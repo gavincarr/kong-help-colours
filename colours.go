@@ -11,8 +11,12 @@
 package helpcolours
 
 import (
+	"io"
+	"os"
 	"regexp"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 // ANSI SGR sequences used by the colouriser.
@@ -60,4 +64,21 @@ func colouriseLine(line string) string {
 		return ansiCyan + m + ansiReset
 	})
 	return line
+}
+
+// shouldColour decides whether to colourise output written to w.
+// Rules: NO_COLOR disables unconditionally; otherwise enabled if
+// FORCE_COLOR is set (any non-empty value) or w is a terminal *os.File.
+func shouldColour(w io.Writer) bool {
+	if os.Getenv("NO_COLOR") != "" {
+		return false
+	}
+	if os.Getenv("FORCE_COLOR") != "" {
+		return true
+	}
+	f, ok := w.(*os.File)
+	if !ok {
+		return false
+	}
+	return term.IsTerminal(int(f.Fd()))
 }

@@ -1,6 +1,8 @@
 package helpcolours
 
 import (
+	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
@@ -174,5 +176,56 @@ func TestColourise_FullHelp(t *testing.T) {
 	got := colourise(in)
 	if got != want {
 		t.Errorf("colourise(...) =\n  got:  %q\n  want: %q", got, want)
+	}
+}
+
+func TestShouldColour_NoColorAlwaysWins(t *testing.T) {
+	t.Setenv("NO_COLOR", "1")
+	t.Setenv("FORCE_COLOR", "1")
+	// Even with a real TTY-like file, NO_COLOR must win.
+	if shouldColour(os.Stdout) {
+		t.Fatal("NO_COLOR set: expected shouldColour=false")
+	}
+}
+
+func TestShouldColour_ForceColor(t *testing.T) {
+	t.Setenv("NO_COLOR", "")
+	t.Setenv("FORCE_COLOR", "1")
+
+	// A pipe is definitely not a TTY, but FORCE_COLOR overrides.
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { r.Close(); w.Close() })
+
+	if !shouldColour(w) {
+		t.Fatal("FORCE_COLOR set: expected shouldColour=true")
+	}
+}
+
+func TestShouldColour_NoTTY(t *testing.T) {
+	t.Setenv("NO_COLOR", "")
+	t.Setenv("FORCE_COLOR", "")
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { r.Close(); w.Close() })
+
+	if shouldColour(w) {
+		t.Fatal("no TTY, no FORCE_COLOR: expected shouldColour=false")
+	}
+}
+
+func TestShouldColour_NonFileWriter(t *testing.T) {
+	t.Setenv("NO_COLOR", "")
+	t.Setenv("FORCE_COLOR", "")
+
+	// A bytes.Buffer is not *os.File — should fall through to false.
+	var buf bytes.Buffer
+	if shouldColour(&buf) {
+		t.Fatal("non-*os.File writer, no FORCE_COLOR: expected shouldColour=false")
 	}
 }
