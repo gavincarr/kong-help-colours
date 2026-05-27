@@ -62,8 +62,6 @@ func renderHelp(t *testing.T, cli any, opts ...kong.Option) []byte {
 	if err != nil {
 		t.Fatalf("kong.New: %v", err)
 	}
-	// k.Stdout is already set to &buf via kong.Writers; keep it in sync.
-	k.Stdout = &buf
 	if _, err := k.Parse([]string{"--help"}); err != nil {
 		// For CLIs with required subcommands, kong prints top-level help
 		// (triggering Exit) and then returns an error. Treat that as success.
