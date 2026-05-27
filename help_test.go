@@ -127,7 +127,14 @@ func TestShortHelp_NoColorMatchesDefault(t *testing.T) {
 	}
 }
 
-func TestHelp_PropagatesTerminalWidth(t *testing.T) {
+// TestHelp_HonoursCOLUMNS verifies that when COLUMNS is set in the
+// environment, Help's buffer-and-postprocess path respects it rather than
+// falling back to kong's 80-col default. This covers the COLUMNS-honoured
+// branch of the fix; the *os.File fd-detection branch in printWithColour
+// can't be exercised portably in `go test` (stdout is a captured pipe,
+// not a TTY) and is verified by the cmd/demo eyeball pass and by users
+// running the tool in real terminals.
+func TestHelp_HonoursCOLUMNS(t *testing.T) {
 	t.Setenv("FORCE_COLOR", "1")
 	t.Setenv("COLUMNS", "120")
 
