@@ -27,6 +27,7 @@ const (
 var (
 	reSectionHeader = regexp.MustCompile(`^[A-Z][A-Za-z0-9 ]*:$`)
 	reUsageLine     = regexp.MustCompile(`^(Usage: )(\S+)`)
+	reFlagToken     = regexp.MustCompile(`(^|[\s,=])(--?[A-Za-z][A-Za-z0-9-]*)`)
 )
 
 // colourise applies the colour rules to a block of help text and returns
@@ -53,5 +54,6 @@ func colouriseLine(line string) string {
 		return ansiYellow + line + ansiReset
 	}
 	line = reUsageLine.ReplaceAllString(line, ansiYellow+"Usage:"+ansiReset+" "+ansiGreen+"${2}"+ansiReset)
+	line = reFlagToken.ReplaceAllString(line, "${1}"+ansiGreen+"${2}"+ansiReset)
 	return line
 }
