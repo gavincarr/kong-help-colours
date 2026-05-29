@@ -3,6 +3,7 @@ package helpcolours
 import (
 	"bytes"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -135,6 +136,13 @@ func TestShortHelp_NoColorMatchesDefault(t *testing.T) {
 // not a TTY) and is verified by the cmd/demo eyeball pass and by users
 // running the tool in real terminals.
 func TestHelp_HonoursCOLUMNS(t *testing.T) {
+	// Kong's guessWidth only reads COLUMNS on unix builds; the Windows
+	// build (guesswidth.go) hardcodes 80 and never consults the env var.
+	// The property under test is real on unix but unreachable on Windows
+	// without an upstream change.
+	if runtime.GOOS == "windows" {
+		t.Skip("kong's guessWidth ignores COLUMNS on Windows")
+	}
 	t.Setenv("FORCE_COLOR", "1")
 	t.Setenv("COLUMNS", "120")
 
