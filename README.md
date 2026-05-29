@@ -1,5 +1,9 @@
 # kong-help-colours
 
+[![CI](https://github.com/gavincarr/kong-help-colours/actions/workflows/ci.yml/badge.svg)](https://github.com/gavincarr/kong-help-colours/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/gavincarr/kong-help-colours.svg)](https://pkg.go.dev/github.com/gavincarr/kong-help-colours)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Drop-in colourised `--help` output for CLIs built with
 [alecthomas/kong](https://github.com/alecthomas/kong). Three colours,
 no configuration, just clap-style help.
