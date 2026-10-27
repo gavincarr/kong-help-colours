@@ -23,8 +23,14 @@ go run ./cmd/demo --help                 # eyeball real TTY output
 go mod tidy && git diff --exit-code go.mod go.sum   # CI tidy check
 ```
 
-CI (`.github/workflows/ci.yml`) runs Go 1.23, 1.24 and stable on Linux,
-macOS and Windows, so `go.mod` stays at `go 1.23.0`.
+CI (`.github/workflows/ci.yml`) runs Go 1.23 (the `go.mod` floor),
+`oldstable` and `stable` on Linux, macOS and Windows.
+
+The `go 1.23.0` floor is deliberate: don't raise it as a side effect of a
+dependency upgrade. Newer `golang.org/x/*` releases follow Go's support
+window and raise their own `go` lines, so `.github/dependabot.yml` caps
+`x/term` and `x/sys` at the last releases that declare 1.23. If you raise
+the floor on purpose, raise those caps and the CI matrix entry with it.
 
 ## Architecture
 

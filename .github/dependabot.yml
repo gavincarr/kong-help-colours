@@ -9,6 +9,14 @@ updates:
       golang-x:
         patterns:
           - "golang.org/x/*"
+    # Hold x/term and x/sys at the last releases that declare go 1.23, so
+    # updates don't silently raise this library's go floor. Raise these
+    # bounds deliberately when bumping the go directive in go.mod.
+    ignore:
+      - dependency-name: "golang.org/x/term"
+        versions: [">= 0.35.0"]
+      - dependency-name: "golang.org/x/sys"
+        versions: [">= 0.36.0"]
 
   - package-ecosystem: github-actions
     directory: /

@@ -14,7 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: ['1.23', '1.24', 'stable']
+        # The go.mod floor, plus the two Go releases currently supported upstream.
+        go: ['1.23', 'oldstable', 'stable']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
